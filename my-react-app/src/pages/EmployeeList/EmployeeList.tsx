@@ -69,8 +69,10 @@ const EmployeeList = () => {
       form.resetFields();
       queryClient.invalidateQueries({ queryKey: ['employees'] });
     },
-    onError: () => {
-      message.error('Tạo nhân viên thất bại!');
+    onError: (error: any) => {
+      // Toast đã được hiển thị bởi axios interceptor
+      // Chỉ log để debug nếu cần
+      console.error('Create employee error:', error);
     },
   });
 
@@ -85,8 +87,10 @@ const EmployeeList = () => {
       form.resetFields();
       queryClient.invalidateQueries({ queryKey: ['employees'] });
     },
-    onError: () => {
-      message.error('Cập nhật nhân viên thất bại!');
+    onError: (error: any) => {
+      // Toast đã được hiển thị bởi axios interceptor
+      // Chỉ log để debug nếu cần
+      console.error('Update employee error:', error);
     },
   });
 
@@ -97,8 +101,10 @@ const EmployeeList = () => {
       message.success('Xóa nhân viên thành công!');
       queryClient.invalidateQueries({ queryKey: ['employees'] });
     },
-    onError: () => {
-      message.error('Xóa nhân viên thất bại!');
+    onError: (error: any) => {
+      // Toast đã được hiển thị bởi axios interceptor
+      // Chỉ log để debug nếu cần
+      console.error('Delete employee error:', error);
     },
   });
 

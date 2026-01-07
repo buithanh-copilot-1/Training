@@ -15,28 +15,21 @@ export interface LoginResponse {
   user: User;
 }
 
-// Mock login - trong thực tế sẽ gọi API thật
+import axiosInstance from './axiosInstance';
+
 export const login = async (data: LoginRequest): Promise<LoginResponse> => {
-  // Demo: chỉ cần email và password bất kỳ
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const mockUser: User = {
-        id: 1,
-        name: 'Admin User',
-        email: data.email,
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
-      };
-      const mockToken = 'mock-jwt-token-' + Date.now();
-      resolve({
-        token: mockToken,
-        user: mockUser,
-      });
-    }, 500);
-  });
+  const response = await axiosInstance.post<LoginResponse>('/auth/login', data);
+  return response.data;
 };
 
 export const logout = async (): Promise<void> => {
+  await axiosInstance.post('/auth/logout');
   localStorage.removeItem('token');
   localStorage.removeItem('user');
+};
+
+export const getCurrentUser = async (): Promise<User> => {
+  const response = await axiosInstance.get<User>('/auth/me');
+  return response.data;
 };
 

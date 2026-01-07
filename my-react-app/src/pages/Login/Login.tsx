@@ -20,8 +20,10 @@ const Login = () => {
       setAuth(response.user, response.token);
       message.success('Đăng nhập thành công!');
       navigate('/employees');
-    } catch (error) {
-      message.error('Đăng nhập thất bại!');
+    } catch (error: any) {
+      // Toast đã được hiển thị bởi axios interceptor
+      // Chỉ log để debug nếu cần
+      console.error('Login error:', error);
     } finally {
       setLoading(false);
     }

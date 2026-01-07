@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "name": "IT",
+    "description": "Phòng Công nghệ Thông tin",
+    "managerId": 3,
+    "managerName": "Lê Văn C",
+    "employeeCount": 15
+  },
+  {
+    "id": 2,
+    "name": "Design",
+    "description": "Phòng Thiết kế",
+    "managerId": 2,
+    "managerName": "Trần Thị B",
+    "employeeCount": 8
+  },
+  {
+    "id": 3,
+    "name": "HR",
+    "description": "Phòng Nhân sự",
+    "employeeCount": 5
+  },
+  {
+    "id": 4,
+    "name": "Marketing",
+    "description": "Phòng Marketing",
+    "employeeCount": 10
+  },
+  {
+    "id": 5,
+    "name": "D1",
+    "description": "Department D1",
+    "managerId": null,
+    "managerName": null,
+    "employeeCount": 0
+  }
+]
