@@ -211,9 +211,9 @@ app.post('/api/employees', authenticate, (req, res) => {
   const employees = readDataFile('employees.json');
   const departments = readDataFile('departments.json');
 
-  const { name, email, phone, position, departmentId, salary, joinDate } = req.body;
+  const { name, email, phone, position, departmentId, salary, joinDate, avatar } = req.body;
 
-  if (!name || !email || !phone || !position || !departmentId) {
+  if (!name || !email || !phone || !position || !departmentId || !avatar) {
     return res.status(400).json({ error: 'Thiếu thông tin bắt buộc' });
   }
 
@@ -235,7 +235,7 @@ app.post('/api/employees', authenticate, (req, res) => {
     departmentName: dept?.name || '',
     salary: salary || null,
     joinDate: joinDate || null,
-    avatar: null,
+    avatar: avatar || null,
   };
 
   employees.push(newEmployee);
@@ -255,7 +255,7 @@ app.put('/api/employees/:id', authenticate, (req, res) => {
     return res.status(404).json({ error: 'Employee not found' });
   }
 
-  const { name, email, phone, position, departmentId, salary, joinDate } = req.body;
+  const { name, email, phone, position, departmentId, salary, joinDate, avatar } = req.body;
 
   // Kiểm tra email trùng (nếu thay đổi email)
   if (email && email !== employees[index].email) {
@@ -273,6 +273,7 @@ app.put('/api/employees/:id', authenticate, (req, res) => {
     ...(departmentId && { departmentId }),
     ...(salary !== undefined && { salary }),
     ...(joinDate && { joinDate }),
+    ...(avatar && { avatar }),
   };
 
   if (departmentId) {

@@ -93,7 +93,7 @@ const MainLayout = () => {
           />
           <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
             <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: 8 }}>
-              <Avatar src={user?.avatar} icon={<UserOutlined />} />
+              <Avatar src={user?.avatar || undefined} icon={<UserOutlined />} />
               <span>{user?.name}</span>
             </div>
           </Dropdown>

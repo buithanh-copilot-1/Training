@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   Table,
   Button,
@@ -13,39 +13,45 @@ import {
   Upload,
   Avatar,
   Tag,
-} from 'antd';
+} from "antd";
 import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
   SearchOutlined,
   UploadOutlined,
-} from '@ant-design/icons';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+} from "@ant-design/icons";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getEmployees,
   createEmployee,
   updateEmployee,
   deleteEmployee,
   type Employee,
-} from '../../api/employeeService';
-import { getDepartments } from '../../api/departmentService';
-import { formatDate } from '../../utils/formatDate';
-import { formatCurrency } from '../../utils/currency';
+} from "../../api/employeeService";
+import { getDepartments } from "../../api/departmentService";
+import { formatDate } from "../../utils/formatDate";
+import { formatCurrency } from "../../utils/currency";
 
 const { Search } = Input;
 
 const EmployeeList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState("");
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
 
+  const avatar = Form.useWatch("avatar", form);
   // Fetch employees
   const { data: employeesData, isLoading } = useQuery({
-    queryKey: ['employees', pagination.current, pagination.pageSize, searchText],
+    queryKey: [
+      "employees",
+      pagination.current,
+      pagination.pageSize,
+      searchText,
+    ],
     queryFn: () =>
       getEmployees({
         page: pagination.current,
@@ -56,7 +62,7 @@ const EmployeeList = () => {
 
   // Fetch departments for select
   const { data: departmentsData } = useQuery({
-    queryKey: ['departments'],
+    queryKey: ["departments"],
     queryFn: () => getDepartments({}),
   });
 
@@ -64,15 +70,15 @@ const EmployeeList = () => {
   const createMutation = useMutation({
     mutationFn: createEmployee,
     onSuccess: () => {
-      message.success('Tạo nhân viên thành công!');
+      message.success("Tạo nhân viên thành công!");
       setIsModalOpen(false);
       form.resetFields();
-      queryClient.invalidateQueries({ queryKey: ['employees'] });
+      queryClient.invalidateQueries({ queryKey: ["employees"] });
     },
     onError: (error: any) => {
       // Toast đã được hiển thị bởi axios interceptor
       // Chỉ log để debug nếu cần
-      console.error('Create employee error:', error);
+      console.error("Create employee error:", error);
     },
   });
 
@@ -81,16 +87,16 @@ const EmployeeList = () => {
     mutationFn: ({ id, data }: { id: number; data: Partial<Employee> }) =>
       updateEmployee(id, data),
     onSuccess: () => {
-      message.success('Cập nhật nhân viên thành công!');
+      message.success("Cập nhật nhân viên thành công!");
       setIsModalOpen(false);
       setEditingEmployee(null);
       form.resetFields();
-      queryClient.invalidateQueries({ queryKey: ['employees'] });
+      queryClient.invalidateQueries({ queryKey: ["employees"] });
     },
     onError: (error: any) => {
       // Toast đã được hiển thị bởi axios interceptor
       // Chỉ log để debug nếu cần
-      console.error('Update employee error:', error);
+      console.error("Update employee error:", error);
     },
   });
 
@@ -98,13 +104,13 @@ const EmployeeList = () => {
   const deleteMutation = useMutation({
     mutationFn: deleteEmployee,
     onSuccess: () => {
-      message.success('Xóa nhân viên thành công!');
-      queryClient.invalidateQueries({ queryKey: ['employees'] });
+      message.success("Xóa nhân viên thành công!");
+      queryClient.invalidateQueries({ queryKey: ["employees"] });
     },
     onError: (error: any) => {
       // Toast đã được hiển thị bởi axios interceptor
       // Chỉ log để debug nếu cần
-      console.error('Delete employee error:', error);
+      console.error("Delete employee error:", error);
     },
   });
 
@@ -127,27 +133,31 @@ const EmployeeList = () => {
     deleteMutation.mutate(id);
   };
 
+  const getBase64 = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
       
-      // Handle image upload (mock - in real app, upload to server first)
-      if (values.avatarFileList && values.avatarFileList.length > 0) {
-        const file = values.avatarFileList[0];
-        if (file.originFileObj) {
-          // In real app, upload file and get URL
-          values.avatar = URL.createObjectURL(file.originFileObj);
-        }
-      }
-      delete values.avatarFileList;
-
+      // Đảm bảo avatar (base64 string) được gửi đi khi thêm mới hoặc cập nhật
+      const submitData = {
+        ...values,
+        avatar: values.avatar || undefined, // Avatar là base64 string hoặc undefined
+      };
+      
       if (editingEmployee) {
-        updateMutation.mutate({ id: editingEmployee.id, data: values });
+        updateMutation.mutate({ id: editingEmployee.id, data: submitData });
       } else {
-        createMutation.mutate(values as Omit<Employee, 'id'>);
+        createMutation.mutate(submitData as Omit<Employee, "id">);
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      console.error("Validation failed:", error);
     }
   };
 
@@ -163,57 +173,58 @@ const EmployeeList = () => {
     });
   };
 
+
   const columns = [
     {
-      title: 'Ảnh',
-      dataIndex: 'avatar',
-      key: 'avatar',
+      title: "Ảnh",
+      dataIndex: "avatar",
+      key: "avatar",
       width: 80,
       render: (avatar: string) => (
         <Avatar src={avatar} icon={<UploadOutlined />} size={40} />
       ),
     },
     {
-      title: 'Tên',
-      dataIndex: 'name',
-      key: 'name',
+      title: "Tên",
+      dataIndex: "name",
+      key: "name",
     },
     {
-      title: 'Email',
-      dataIndex: 'email',
-      key: 'email',
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
     },
     {
-      title: 'Số điện thoại',
-      dataIndex: 'phone',
-      key: 'phone',
+      title: "Số điện thoại",
+      dataIndex: "phone",
+      key: "phone",
     },
     {
-      title: 'Chức vụ',
-      dataIndex: 'position',
-      key: 'position',
+      title: "Chức vụ",
+      dataIndex: "position",
+      key: "position",
       render: (position: string) => <Tag color="blue">{position}</Tag>,
     },
     {
-      title: 'Phòng ban',
-      dataIndex: 'departmentName',
-      key: 'departmentName',
+      title: "Phòng ban",
+      dataIndex: "departmentName",
+      key: "departmentName",
     },
     {
-      title: 'Lương',
-      dataIndex: 'salary',
-      key: 'salary',
+      title: "Lương",
+      dataIndex: "salary",
+      key: "salary",
       render: (salary: number) => formatCurrency(salary),
     },
     {
-      title: 'Ngày vào làm',
-      dataIndex: 'joinDate',
-      key: 'joinDate',
+      title: "Ngày vào làm",
+      dataIndex: "joinDate",
+      key: "joinDate",
       render: (date: string) => formatDate(date),
     },
     {
-      title: 'Thao tác',
-      key: 'action',
+      title: "Thao tác",
+      key: "action",
       width: 150,
       render: (_: any, record: Employee) => (
         <Space size="middle">
@@ -242,7 +253,13 @@ const EmployeeList = () => {
 
   return (
     <div>
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between' }}>
+      <div
+        style={{
+          marginBottom: 16,
+          display: "flex",
+          justifyContent: "space-between",
+        }}
+      >
         <Search
           placeholder="Tìm kiếm nhân viên..."
           allowClear
@@ -251,7 +268,12 @@ const EmployeeList = () => {
           style={{ width: 400 }}
           onSearch={handleSearch}
         />
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd} size="large">
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={handleAdd}
+          size="large"
+        >
           Thêm nhân viên
         </Button>
       </div>
@@ -272,7 +294,7 @@ const EmployeeList = () => {
       />
 
       <Modal
-        title={editingEmployee ? 'Sửa nhân viên' : 'Thêm nhân viên'}
+        title={editingEmployee ? "Sửa nhân viên" : "Thêm nhân viên"}
         open={isModalOpen}
         onOk={handleSubmit}
         onCancel={() => {
@@ -293,7 +315,9 @@ const EmployeeList = () => {
           <Form.Item
             name="name"
             label="Tên nhân viên"
-            rules={[{ required: true, message: 'Vui lòng nhập tên nhân viên!' }]}
+            rules={[
+              { required: true, message: "Vui lòng nhập tên nhân viên!" },
+            ]}
           >
             <Input placeholder="Nhập tên nhân viên" />
           </Form.Item>
@@ -302,8 +326,8 @@ const EmployeeList = () => {
             name="email"
             label="Email"
             rules={[
-              { required: true, message: 'Vui lòng nhập email!' },
-              { type: 'email', message: 'Email không hợp lệ!' },
+              { required: true, message: "Vui lòng nhập email!" },
+              { type: "email", message: "Email không hợp lệ!" },
             ]}
           >
             <Input placeholder="Nhập email" />
@@ -312,7 +336,9 @@ const EmployeeList = () => {
           <Form.Item
             name="phone"
             label="Số điện thoại"
-            rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }]}
+            rules={[
+              { required: true, message: "Vui lòng nhập số điện thoại!" },
+            ]}
           >
             <Input placeholder="Nhập số điện thoại" />
           </Form.Item>
@@ -320,7 +346,7 @@ const EmployeeList = () => {
           <Form.Item
             name="position"
             label="Chức vụ"
-            rules={[{ required: true, message: 'Vui lòng nhập chức vụ!' }]}
+            rules={[{ required: true, message: "Vui lòng nhập chức vụ!" }]}
           >
             <Input placeholder="Nhập chức vụ" />
           </Form.Item>
@@ -328,7 +354,7 @@ const EmployeeList = () => {
           <Form.Item
             name="departmentId"
             label="Phòng ban"
-            rules={[{ required: true, message: 'Vui lòng chọn phòng ban!' }]}
+            rules={[{ required: true, message: "Vui lòng chọn phòng ban!" }]}
           >
             <Select
               placeholder="Chọn phòng ban"
@@ -342,36 +368,110 @@ const EmployeeList = () => {
           <Form.Item
             name="salary"
             label="Lương"
-            rules={[{ required: true, message: 'Vui lòng nhập lương!' }]}
+            rules={[{ required: true, message: "Vui lòng nhập lương!" }]}
           >
             <InputNumber
-              style={{ width: '100%' }}
+              style={{ width: "100%" }}
               placeholder="Nhập lương"
-              formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-              parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
+              formatter={(value) =>
+                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+              }
+              parser={(value) => value!.replace(/\$\s?|(,*)/g, "")}
             />
           </Form.Item>
 
           <Form.Item
             name="joinDate"
             label="Ngày vào làm"
-            rules={[{ required: true, message: 'Vui lòng nhập ngày vào làm!' }]}
+            rules={[{ required: true, message: "Vui lòng nhập ngày vào làm!" }]}
           >
             <Input type="date" />
           </Form.Item>
 
-          <Form.Item name="avatarFileList" label="Ảnh đại diện">
-            <Upload
-              listType="picture-card"
-              maxCount={1}
-              beforeUpload={() => false}
-            >
-              <div>
-                <UploadOutlined />
-                <div style={{ marginTop: 8 }}>Upload</div>
-              </div>
-            </Upload>
-          </Form.Item>
+            <Form.Item name="avatar" label="Ảnh đại diện">
+             <div style={{ position: "relative", width: 104, height: 104 }}>
+               {avatar ? (
+                 <>
+                   <Avatar
+                     src={avatar}
+                     size={100}
+                     style={{ display: "block" }}
+                   />
+                   <Upload
+                     showUploadList={false}
+                     maxCount={1}
+                     beforeUpload={(file) => {
+                       getBase64(file as File).then((base64) => {
+                         form.setFieldValue("avatar", base64);
+                       });
+                       return false; // Ngăn upload tự động
+                     }}
+                   >
+                     <div
+                       style={{
+                         position: "absolute",
+                         bottom: 0,
+                         right: 0,
+                         background: "#1890ff",
+                         borderRadius: "50%",
+                         width: 32,
+                         height: 32,
+                         display: "flex",
+                         alignItems: "center",
+                         justifyContent: "center",
+                         cursor: "pointer",
+                         color: "white",
+                         fontSize: 16,
+                       }}
+                       title="Thay đổi ảnh"
+                     >
+                       ✏️
+                     </div>
+                   </Upload>
+                   <Button
+                     type="text"
+                     danger
+                     size="small"
+                     icon={<DeleteOutlined />}
+                     onClick={() => {
+                       form.setFieldValue("avatar", undefined);
+                     }}
+                     style={{
+                       position: "absolute",
+                       top: 0,
+                       right: 0,
+                       padding: 0,
+                       width: 24,
+                       height: 24,
+                       minWidth: 24,
+                       background: "rgba(255, 77, 79, 0.8)",
+                       borderRadius: "50%",
+                       display: "flex",
+                       alignItems: "center",
+                       justifyContent: "center",
+                     }}
+                     title="Xóa ảnh"
+                   />
+                 </>
+               ) : (
+                 <Upload
+                   listType="picture-card"
+                   maxCount={1}
+                   beforeUpload={(file) => {
+                     getBase64(file as File).then((base64) => {
+                       form.setFieldValue("avatar", base64);
+                     });
+                     return false; // Ngăn upload tự động
+                   }}
+                 >
+                   <div>
+                     <UploadOutlined />
+                     <div style={{ marginTop: 8 }}>Upload</div>
+                   </div>
+                 </Upload>
+               )}
+             </div>
+           </Form.Item>
         </Form>
       </Modal>
     </div>
@@ -379,4 +479,3 @@ const EmployeeList = () => {
 };
 
 export default EmployeeList;
-
