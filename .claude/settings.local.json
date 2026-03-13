@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.tvtruyen.com)",
+      "Bash(cd /Users/buithanh/Documents/workspace/buithanh1971-gmail.com/tvtruyen-be && npm install)",
+      "mcp__ide__getDiagnostics"
+    ]
+  }
+}
