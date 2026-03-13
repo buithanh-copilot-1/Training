@@ -7,6 +7,8 @@ import config from './config';
 // Import routes
 import authRoutes from './routes/auth.routes';
 import novelRoutes from './routes/novel.routes';
+import categoryRoutes from './routes/category.routes';
+import searchRoutes from './routes/search.routes';
 
 const app: Application = express();
 
@@ -20,6 +22,8 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/novels', novelRoutes);
+app.use('/api', categoryRoutes);
+app.use('/api', searchRoutes);
 
 // Health check
 app.get('/health', (_req: Request, res: Response) => {
